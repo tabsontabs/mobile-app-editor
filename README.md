@@ -20,6 +20,7 @@ A full-stack React application for configuring mobile app content, built with Re
   - Server-side authentication with API keys
   - File-based JSON storage
 
+
 ### Installation
 
 ```bash
@@ -34,7 +35,7 @@ Create a `.env` file with:
 CONFIG_API_KEY=your-secure-api-key-here
 ```
 
-The API key is used for authenticating requests to the configuration API. In development, a default key is used if not specified.
+The API key is used for authenticating external requests to the REST API. In development, a default key is used if not specified.
 
 ### Development
 
@@ -46,38 +47,15 @@ Application available at `http://localhost:5173`
 
 ## Architecture
 
-### Storage Approach
 
-**Choice: File-based JSON storage**
+### Server-Side Data Access
 
-**Rationale:**
-- Zero dependencies - works out of the box
-- Simple deployment - no database setup required
-- Human-readable configs - easy debugging
-- Suitable for single-user/low-traffic scenarios
-- Easy migration to database later if needed
+The application follows React Router best practices:
 
-**Limitations:**
-- Not suitable for high-concurrency scenarios
-- No complex querying capabilities
-- Should use database for production with multiple users
+- **Loaders**: Fetch configuration data on initial page load
+- **Actions**: Persist configuration updates when the user saves
 
-### Configuration Structure
-
-```typescript
-interface StoredConfig {
-  id: string;              // Unique identifier
-  schemaVersion: number;   // For schema evolution
-  updatedAt: string;       // ISO timestamp
-  createdAt: string;       // ISO timestamp
-  data: {
-    carousel: CarouselConfig;
-    text: TextConfig;
-    cta: CtaConfig;
-  };
-}
-```
-
+The browser never directly accesses the configuration service. The `.server.ts` suffix guarantees this code only runs on the server.
 ## REST API
 
 ### Authentication
@@ -85,10 +63,8 @@ interface StoredConfig {
 All API endpoints require Bearer token authentication:
 
 ```
-Authorization: Bearer <API_KEY>
+Authorization: Bearer <CONFIG_API_KEY>
 ```
-
-The API key is stored server-side only and never exposed to the browser.
 
 ### Endpoints
 
@@ -103,7 +79,7 @@ GET /api/configs
   "success": true,
   "data": [
     {
-      "id": "config-123",
+      "id": "default",
       "schemaVersion": 1,
       "createdAt": "2024-01-01T00:00:00.000Z",
       "updatedAt": "2024-01-02T00:00:00.000Z"
@@ -122,7 +98,7 @@ GET /api/configs/:id
 {
   "success": true,
   "data": {
-    "id": "config-123",
+    "id": "default",
     "schemaVersion": 1,
     "createdAt": "2024-01-01T00:00:00.000Z",
     "updatedAt": "2024-01-02T00:00:00.000Z",
@@ -131,17 +107,6 @@ GET /api/configs/:id
       "text": { ... },
       "cta": { ... }
     }
-  }
-}
-```
-
-**Error Response:** `404 Not Found`
-```json
-{
-  "success": false,
-  "error": {
-    "code": "NOT_FOUND",
-    "message": "Configuration with id 'config-123' not found"
   }
 }
 ```
@@ -199,7 +164,18 @@ DELETE /api/configs/:id
 
 **Response:** `204 No Content`
 
-### Error Codes
+### Error Responses
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid configuration payload",
+    "details": ["Text headingColor must be a valid hex color"]
+  }
+}
+```
 
 | Code | HTTP Status | Description |
 |------|-------------|-------------|
@@ -209,53 +185,77 @@ DELETE /api/configs/:id
 | NOT_FOUND | 404 | Configuration not found |
 | ALREADY_EXISTS | 409 | Configuration ID already exists |
 | FORBIDDEN | 403 | Operation not allowed |
+| METHOD_NOT_ALLOWED | 405 | HTTP method not supported |
 | INTERNAL_ERROR | 500 | Server error |
 
 ### Validation Rules
 
-- **Hex colors:** Must match `/^#[0-9A-Fa-f]{6}$/`
-- **URLs:** Must start with `http://`, `https://`, `/`, or `#`
-- **Aspect ratios:** Must be `portrait`, `landscape`, or `square`
-- **Slide fields:** `id`, `imageUrl`, `altText`, `aspectRatio` are required
+| Field | Validation |
+|-------|------------|
+| Hex colors | Must match `/^#[0-9A-Fa-f]{6}$/` |
+| URLs | Must start with `http://`, `https://`, `/`, or `#` |
+| Aspect ratios | Must be `portrait`, `landscape`, or `square` |
+| Slides | Required: `id`, `imageUrl`, `altText`, `aspectRatio` |
 
-## Server-Side API Access
+## Configuration Structure
 
-The application uses React Router loaders and actions to ensure:
-
-1. **Browser never calls API directly** - All requests go through server-side code
-2. **API keys stay on server** - Credentials never exposed to client
-3. **Page reload restores state** - Configuration loaded via server-side loader
-
+```typescript
+interface StoredConfig {
+  id: string;              // Unique identifier
+  schemaVersion: number;   // For schema evolution
+  createdAt: string;       // ISO timestamp
+  updatedAt: string;       // ISO timestamp
+  data: {
+    carousel: CarouselConfig;
+    text: TextConfig;
+    cta: CtaConfig;
+  };
+}
 ```
-Browser <-> React Router (Server) <-> Configuration Service
-                                          |
-                                    [API Key Auth]
-```
+
+## Storage
+
+**Approach: File-based JSON storage**
+
+**Rationale:**
+- Zero dependencies — works out of the box
+- Simple deployment — no database setup required
+- Human-readable — easy debugging
+- Suitable for single-user/low-traffic scenarios
+
+**Limitations:**
+- Not suitable for high-concurrency
+- No complex querying
+- Use a database for production with multiple users
 
 ## Import/Export
 
 Users can backup and restore configurations via JSON files:
 
-- **Export:** Downloads current configuration as JSON
-- **Import:** Uploads JSON file to restore configuration
+- **Export**: Downloads current configuration as JSON
+- **Import**: Uploads JSON file to restore configuration
 
-## Development
-
-### Project Structure
+## Project Structure
 
 ```
 app/
 ├── components/
-│   ├── editor/          # Editor components
-│   └── preview/         # Preview components
-├── context/             # React Context
-├── routes/              # React Router routes
-│   ├── _index.tsx       # Main editor page
-│   ├── api.configs.ts   # List/Create API
-│   └── api.configs.$id.ts # Get/Update/Delete API
-├── services/            # Server-side services
-├── types/               # TypeScript types
-└── utils/               # Utilities
+│   ├── editor/          # Editor UI components
+│   └── preview/         # Preview UI components
+├── context/
+│   └── ConfigContext.tsx
+├── routes/
+│   ├── _index.tsx       # Main page (loader + action)
+│   ├── api.configs.ts   # REST API: list, create
+│   └── api.configs.$id.ts # REST API: get, update, delete
+├── services/
+│   └── config.server.ts # Configuration service
+├── types/
+│   └── config.ts        # TypeScript definitions
+└── utils/
+    ├── auth.server.ts   # API authentication
+    ├── defaults.ts      # Default values
+    └── validation.server.ts
 data/
 └── configs/             # Stored configurations
 ```

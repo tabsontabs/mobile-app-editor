@@ -2,7 +2,7 @@
   "id": "default",
   "schemaVersion": 1,
   "createdAt": "2026-02-02T01:25:07.012Z",
-  "updatedAt": "2026-02-02T02:52:18.870Z",
+  "updatedAt": "2026-02-02T22:34:30.345Z",
   "data": {
     "carousel": {
       "slides": [
@@ -31,15 +31,15 @@
     },
     "text": {
       "heading": "Test Test Test",
-      "headingColor": "#000000",
-      "description": "Testing testing testing",
+      "headingColor": "#cb3a3a",
+      "description": "Testing testing testing testing testing",
       "descriptionColor": "#334155"
     },
     "cta": {
       "primaryText": "CTA cta",
       "primaryUrl": "/testttt",
-      "primaryColor": "#006eff",
-      "primaryTextColor": "#000000"
+      "primaryColor": "#9e90bb",
+      "primaryTextColor": "#ffffff"
     }
   }
 }

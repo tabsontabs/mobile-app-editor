@@ -1,8 +1,11 @@
 /**
- * REST API endpoint for listing configurations and creating new ones
+ * REST API Resource Route: /api/configs
  * 
- * GET /api/configs - List all configurations
- * POST /api/configs - Create a new configuration
+ * GET  - List all configurations
+ * POST - Create a new configuration
+ * 
+ * This is a Resource Route (returns JSON).
+ * Protected by API key auth.
  */
 
 import type { Route } from './+types/api.configs';
@@ -14,22 +17,16 @@ import type { ConfigPayload, ApiResponse } from '~/types/config';
 function jsonResponse<T>(data: ApiResponse<T>, status: number = 200): Response {
   return new Response(JSON.stringify(data), {
     status,
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
   });
 }
 
 function errorResponse(code: string, message: string, status: number, details?: string[]): Response {
-  return jsonResponse({
-    success: false,
-    error: { code, message, details },
-  }, status);
+  return jsonResponse({ success: false, error: { code, message, details } }, status);
 }
 
-// GET /api/configs - List all configurations
+// GET /api/configs
 export async function loader({ request }: Route.LoaderArgs) {
-  // Validate authentication
   const auth = validateApiKey(request);
   if (!auth.isValid) {
     return errorResponse('UNAUTHORIZED', auth.error || 'Unauthorized', 401);
@@ -41,28 +38,24 @@ export async function loader({ request }: Route.LoaderArgs) {
     return errorResponse(
       result.error?.code || 'INTERNAL_ERROR',
       result.error?.message || 'Failed to list configurations',
-      500,
-      result.error?.details
+      500
     );
   }
 
-  return jsonResponse({ success: true, data: result.data }, 200);
+  return jsonResponse({ success: true, data: result.data });
 }
 
-// POST /api/configs - Create a new configuration
+// POST /api/configs
 export async function action({ request }: Route.ActionArgs) {
-  // Only allow POST method
   if (request.method !== 'POST') {
     return errorResponse('METHOD_NOT_ALLOWED', `Method ${request.method} not allowed`, 405);
   }
 
-  // Validate authentication
   const auth = validateApiKey(request);
   if (!auth.isValid) {
     return errorResponse('UNAUTHORIZED', auth.error || 'Unauthorized', 401);
   }
 
-  // Parse request body
   let body: unknown;
   try {
     body = await request.json();
@@ -70,14 +63,12 @@ export async function action({ request }: Route.ActionArgs) {
     return errorResponse('BAD_REQUEST', 'Invalid JSON in request body', 400);
   }
 
-  // Validate payload
   const payload = body as ConfigPayload;
   const validation = validateConfigPayload(payload);
   if (!validation.isValid) {
     return errorResponse('VALIDATION_ERROR', 'Invalid configuration payload', 400, validation.errors);
   }
 
-  // Create the configuration
   const result = await createConfig(payload);
 
   if (!result.success) {
@@ -85,8 +76,7 @@ export async function action({ request }: Route.ActionArgs) {
     return errorResponse(
       result.error?.code || 'INTERNAL_ERROR',
       result.error?.message || 'Failed to create configuration',
-      status,
-      result.error?.details
+      status
     );
   }
 
