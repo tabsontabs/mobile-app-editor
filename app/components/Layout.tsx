@@ -27,34 +27,36 @@ export function Layout({ onSave, isSaving }: LayoutProps) {
   return (
     <div className="min-h-screen bg-slate-100">
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
+        <div className="max-w-7xl mx-auto px-4 p-4 lg:px-8">
+          <div className="flex items-center justify-between flex-col lg:flex-row">
+            <div className="flex items-center gap-3 mb-2 lg:mb-0">
               <h1 className="text-xl font-bold text-slate-800">
                 Mobile App Editor
               </h1>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center flex-col lg:flex-row gap-3">
               {hasUnsavedChanges && (
                 <span className="text-sm text-amber-600 font-medium">Unsaved changes</span>
               )}
-              <button
-                type="button"
-                onClick={resetConfig}
-                disabled={!hasUnsavedChanges}
-                className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                Reset
-              </button>
-              <button
-                type="button"
-                onClick={onSave}
-                disabled={!hasUnsavedChanges || isSaving}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {isSaving ? 'Saving...' : 'Save Changes'}
-              </button>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={resetConfig}
+                  disabled={!hasUnsavedChanges}
+                  className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Reset
+                </button>
+                <button
+                  type="button"
+                  onClick={onSave}
+                  disabled={!hasUnsavedChanges || isSaving}
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {isSaving ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -63,7 +65,7 @@ export function Layout({ onSave, isSaving }: LayoutProps) {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Editor Panel */}
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden order-2 lg:order-1">
             <div className="border-b border-slate-200">
               <nav className="flex">
                 {sections.map((section) => (
@@ -89,7 +91,7 @@ export function Layout({ onSave, isSaving }: LayoutProps) {
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 order-1 lg:order-2">
             <h2 className="text-lg text-center font-semibold">Preview</h2>
 
             <div className="flex justify-center">
