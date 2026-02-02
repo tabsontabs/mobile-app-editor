@@ -7,6 +7,8 @@ import { getConfigById, updateConfig } from '~/services/config.server';
 import type { ConfigPayload } from '~/types/config';
 import { defaultConfig } from '~/utils/defaults';
 
+const MIN_SAVING_DISPLAY_MS = 1000;
+
 export async function loader() {
   const result = await getConfigById('default');
   if (result.success && result.data) {
@@ -35,29 +37,43 @@ export async function action({ request }: Route.ActionArgs) {
 function EditorContent() {
   const fetcher = useFetcher<typeof action>();
   const { config, markAsSaved } = useConfig();
-  const [isSaving, setIsSaving] = useState(false);
   const prevDataRef = useRef(fetcher.data);
+  const saveStartTimeRef = useRef<number | null>(null);
+  const [showSaving, setShowSaving] = useState(false);
 
+  // track when request completes and enforce minimum display time
   useEffect(() => {
     if (fetcher.data !== prevDataRef.current && fetcher.data?.success) {
       markAsSaved();
     }
     prevDataRef.current = fetcher.data;
-  }, [fetcher.data, markAsSaved]);
 
-  const handleSave = async () => {
-    setIsSaving(true);
+    if (fetcher.state === 'idle' && saveStartTimeRef.current !== null) {
+      const elapsed = Date.now() - saveStartTimeRef.current;
+      const remaining = Math.max(0, MIN_SAVING_DISPLAY_MS - elapsed);
+      
+      if (remaining > 0) {
+        const timer = setTimeout(() => setShowSaving(false), remaining);
+        return () => clearTimeout(timer);
+      } else {
+        setShowSaving(false);
+      }
+      saveStartTimeRef.current = null;
+    }
+  }, [fetcher.data, fetcher.state, markAsSaved]);
+
+  const handleSave = () => {
+    saveStartTimeRef.current = Date.now();
+    setShowSaving(true);
     fetcher.submit(
       { config: JSON.stringify(config) },
       { method: 'POST' }
     );
-    // reset saving state after a short delay
-    setTimeout(() => setIsSaving(false), 1000);
   };
 
   const saveError = fetcher.data && !fetcher.data.success ? fetcher.data.error : null;
 
-  return <Layout onSave={handleSave} isSaving={isSaving || fetcher.state === 'submitting'} saveError={saveError} />;
+  return <Layout onSave={handleSave} isSaving={showSaving} saveError={saveError} />;
 }
 
 export default function Index() {
