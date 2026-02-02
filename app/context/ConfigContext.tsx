@@ -1,39 +1,45 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
-import type { MobileHomeConfig, CarouselConfig, TextConfig, CtaConfig } from '~/types/config';
+import type { ConfigPayload, CarouselConfig, TextConfig, CtaConfig } from '~/types/config';
 import { defaultConfig } from '~/utils/defaults';
 
 interface ConfigContextValue {
-  config: MobileHomeConfig;
+  config: ConfigPayload;
   updateCarousel: (updates: Partial<CarouselConfig>) => void;
   updateText: (updates: Partial<TextConfig>) => void;
   updateCta: (updates: Partial<CtaConfig>) => void;
   resetConfig: () => void;
   hasUnsavedChanges: boolean;
-  setConfig: (config: MobileHomeConfig) => void;
+  setConfig: (config: ConfigPayload, markAsUnsaved?: boolean) => void;
+  markAsSaved: () => void;
 }
 
 const ConfigContext = createContext<ConfigContextValue | null>(null);
 
 interface ConfigProviderProps {
   children: ReactNode;
-  initialConfig?: MobileHomeConfig;
+  initialConfig?: ConfigPayload;
 }
 
 export function ConfigProvider({ children, initialConfig }: ConfigProviderProps) {
-  const [config, setConfigState] = useState<MobileHomeConfig>(initialConfig ?? defaultConfig);
-  const [originalConfig] = useState<MobileHomeConfig>(initialConfig ?? defaultConfig);
+  const [config, setConfigState] = useState<ConfigPayload>(initialConfig ?? defaultConfig);
+  // savedConfig is what Reset goes back to - starts as initial, updates only on Save
+  const [savedConfig, setSavedConfig] = useState<ConfigPayload>(initialConfig ?? defaultConfig);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  const setConfig = useCallback((newConfig: MobileHomeConfig) => {
+  const setConfig = useCallback((newConfig: ConfigPayload, markAsUnsaved: boolean = false) => {
     setConfigState(newConfig);
-    setHasUnsavedChanges(false);
+    setHasUnsavedChanges(markAsUnsaved);
   }, []);
+
+  const markAsSaved = useCallback(() => {
+    setSavedConfig(config);
+    setHasUnsavedChanges(false);
+  }, [config]);
 
   const updateCarousel = useCallback((updates: Partial<CarouselConfig>) => {
     setConfigState((prev) => ({
       ...prev,
       carousel: { ...prev.carousel, ...updates },
-      lastUpdated: new Date().toISOString(),
     }));
     setHasUnsavedChanges(true);
   }, []);
@@ -42,7 +48,6 @@ export function ConfigProvider({ children, initialConfig }: ConfigProviderProps)
     setConfigState((prev) => ({
       ...prev,
       text: { ...prev.text, ...updates },
-      lastUpdated: new Date().toISOString(),
     }));
     setHasUnsavedChanges(true);
   }, []);
@@ -51,15 +56,14 @@ export function ConfigProvider({ children, initialConfig }: ConfigProviderProps)
     setConfigState((prev) => ({
       ...prev,
       cta: { ...prev.cta, ...updates },
-      lastUpdated: new Date().toISOString(),
     }));
     setHasUnsavedChanges(true);
   }, []);
 
   const resetConfig = useCallback(() => {
-    setConfigState(originalConfig);
+    setConfigState(savedConfig);
     setHasUnsavedChanges(false);
-  }, [originalConfig]);
+  }, [savedConfig]);
 
   return (
     <ConfigContext.Provider
@@ -71,6 +75,7 @@ export function ConfigProvider({ children, initialConfig }: ConfigProviderProps)
         resetConfig,
         hasUnsavedChanges,
         setConfig,
+        markAsSaved,
       }}
     >
       {children}

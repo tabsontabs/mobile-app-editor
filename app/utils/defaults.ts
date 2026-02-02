@@ -1,6 +1,6 @@
-import type { MobileHomeConfig } from '~/types/config';
+import type { ConfigPayload } from '~/types/config';
 
-export const defaultConfig: MobileHomeConfig = {
+export const defaultConfig: ConfigPayload = {
   carousel: {
     slides: [
       {
@@ -15,7 +15,7 @@ export const defaultConfig: MobileHomeConfig = {
         imageUrl: 'https://www.borrowmydoggy.com/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2F4ij0poqn%2Fproduction%2F2b1b8fc4b6cf03c02f869d67f3f16187396264c0-3999x3999.jpg%3Ffit%3Dmax%26auto%3Dformat&w=1080&q=75',
         altText: 'black and tan dachshund',
         linkUrl: '##',
-        aspectRatio: 'landscape',
+        aspectRatio: 'square',
       },
       {
         id: 'slide-3',
@@ -27,20 +27,19 @@ export const defaultConfig: MobileHomeConfig = {
     ],
   },
   text: {
-    heading: 'Test Test Test',
+    heading: 'Welcome to Our Store',
     headingColor: '#000000',
-    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-    descriptionColor: '#334155',
+    description: 'Browse our curated collection of premium items designed to elevate your everyday experience.',
+    descriptionColor: '#000000',
   },
   cta: {
-    primaryText: 'Test',
-    primaryUrl: '/test',
+    primaryText: 'Shop Now',
+    primaryUrl: '/shop',
     primaryColor: '#000000',
     primaryTextColor: '#ffffff',
   },
-  lastUpdated: new Date().toISOString(),
 };
 
 export function generateSlideId(): string {
-  return 'slide-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+  return `slide-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
