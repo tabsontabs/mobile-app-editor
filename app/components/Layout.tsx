@@ -30,16 +30,13 @@ export function Layout({ onSave, isSaving, saveError }: LayoutProps) {
   ];
 
   const handleExport = () => {
+    const now = new Date().toISOString();
     const exportData: StoredConfig = {
       id: 'exported-config',
       schemaVersion: CURRENT_SCHEMA_VERSION,
-      createdAt: new Date().toISOString(),
-      updatedAt: config.lastUpdated || new Date().toISOString(),
-      data: {
-        carousel: config.carousel,
-        text: config.text,
-        cta: config.cta,
-      },
+      createdAt: now,
+      updatedAt: now,
+      data: config,
     };
 
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
@@ -87,12 +84,7 @@ export function Layout({ onSave, isSaving, saveError }: LayoutProps) {
         throw new Error('carousel slides must be an array');
       }
 
-      setConfig({
-        carousel: payload.carousel,
-        text: payload.text,
-        cta: payload.cta,
-        lastUpdated: new Date().toISOString(),
-      }, true);
+      setConfig(payload, true);
 
       setImportError(null);
       setImportedFileName(file.name);
