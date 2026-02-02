@@ -239,11 +239,6 @@ Users can backup and restore configurations via JSON files:
 - **Export:** Downloads current configuration as JSON
 - **Import:** Uploads JSON file to restore configuration
 
-Supported formats:
-- Full `StoredConfig` with metadata
-- `ConfigPayload` (data only)
-- Legacy `MobileHomeConfig` format
-
 ## Development
 
 ### Project Structure
@@ -264,24 +259,3 @@ app/
 data/
 └── configs/             # Stored configurations
 ```
-
-### Building for Production
-
-```bash
-npm run build
-```
-
-## Deployment
-
-### Docker
-
-```bash
-docker build -t mobile-app-editor .
-docker run -p 3000:3000 -e CONFIG_API_KEY=your-key mobile-app-editor
-```
-
-### Environment Variables
-
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| CONFIG_API_KEY | No | dev-api-key-12345 | API authentication key |
