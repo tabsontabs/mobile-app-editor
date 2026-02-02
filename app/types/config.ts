@@ -1,10 +1,13 @@
 // Configuration types for the mobile app editor
 
+export type AspectRatio = 'portrait' | 'landscape' | 'square';
+
 export interface CarouselSlide {
   id: string;
   imageUrl: string;
   altText: string;
   linkUrl?: string;
+  aspectRatio: AspectRatio;
 }
 
 export interface CarouselConfig {

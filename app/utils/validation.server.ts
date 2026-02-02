@@ -21,6 +21,9 @@ function validateCarousel(carousel: CarouselConfig): string[] {
       if (!slide.altText) {
         errors.push(`Slide ${index + 1}: altText is required`);
       }
+      if (!['portrait', 'landscape', 'square'].includes(slide.aspectRatio)) {
+        errors.push(`Slide ${index + 1}: aspectRatio must be portrait, landscape, or square`);
+      }
     });
   }
 

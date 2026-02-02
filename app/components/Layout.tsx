@@ -94,15 +94,15 @@ export function Layout({ onSave, isSaving }: LayoutProps) {
 
             <div className="flex justify-center">
               <div className="relative w-[375px] bg-slate-900 rounded-[3rem] p-3 shadow-2xl">
-                <div className="bg-white rounded-[2.5rem] overflow-hidden min-h-[667px]">
-                  <div className="h-12 bg-slate-900 flex items-end justify-between px-6 pb-2 text-white text-xs">
+                <div className="bg-white rounded-[2.5rem] overflow-hidden h-[667px] flex flex-col">
+                  <div className="h-12 bg-slate-900 flex items-end justify-between px-6 pb-2 text-white text-xs shrink-0">
                     <span>9:41</span>
                     <div className="flex gap-1">
                       <span>📶</span>
                       <span>🔋</span>
                     </div>
                   </div>
-                  <div className="bg-white">
+                  <div className="bg-white flex-1 overflow-y-auto">
                     <CarouselPreview />
                     <TextPreview />
                     <CtaPreview />

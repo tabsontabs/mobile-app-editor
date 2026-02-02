@@ -33,31 +33,55 @@ export function CarouselPreview() {
 
   const currentSlide = carousel.slides[currentIndex];
 
+  // determine the tallest aspect ratio among all slides
+  // portrait (3/4) is tallest, then square (1/1), then landscape (16/9)
+  const aspectRatioPriority = { portrait: 3, square: 2, landscape: 1 };
+  
+  const tallestAspectRatio = carousel.slides.reduce((tallest, slide) => {
+    const slideRatio = slide.aspectRatio || 'landscape';
+    return aspectRatioPriority[slideRatio] > aspectRatioPriority[tallest] ? slideRatio : tallest;
+  }, 'landscape' as 'portrait' | 'landscape' | 'square');
+
+  const containerAspectClass = {
+    portrait: 'aspect-[3/4]',
+    landscape: 'aspect-[16/9]',
+    square: 'aspect-square',
+  }[tallestAspectRatio];
+
+  const currentSlideAspectClass = {
+    portrait: 'aspect-[3/4]',
+    landscape: 'aspect-[16/9]',
+    square: 'aspect-square',
+  }[currentSlide?.aspectRatio || 'landscape'];
+
   return (
-    <div className="relative w-full overflow-hidden rounded-lg bg-slate-900">
-      {/* Slide */}
-      <div className="relative aspect-[2/1]">
-        {currentSlide?.linkUrl ? (
-          <a href={currentSlide.linkUrl} className="block w-full h-full">
+    <div className="relative w-full overflow-hidden bg-slate-900">
+      {/* slide Container - uses tallest aspect ratio */}
+      <div className={`relative ${containerAspectClass} flex items-center justify-center`}>
+        {/* image wrapper - uses its own aspect ratio */}
+        <div className={`relative ${currentSlideAspectClass} max-w-full`}>
+          {currentSlide?.linkUrl ? (
+            <a href={currentSlide.linkUrl} className="block w-full h-full">
+              <img
+                src={currentSlide.imageUrl}
+                alt={currentSlide.altText}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200" viewBox="0 0 400 200"><rect fill="%23374151" width="400" height="200"/><text fill="%239ca3af" font-size="14" x="50%" y="50%" text-anchor="middle" dy=".3em">Image not found</text></svg>';
+                }}
+              />
+            </a>
+          ) : (
             <img
-              src={currentSlide.imageUrl}
-              alt={currentSlide.altText}
+              src={currentSlide?.imageUrl}
+              alt={currentSlide?.altText}
               className="w-full h-full object-cover"
               onError={(e) => {
                 e.currentTarget.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200" viewBox="0 0 400 200"><rect fill="%23374151" width="400" height="200"/><text fill="%239ca3af" font-size="14" x="50%" y="50%" text-anchor="middle" dy=".3em">Image not found</text></svg>';
               }}
             />
-          </a>
-        ) : (
-          <img
-            src={currentSlide?.imageUrl}
-            alt={currentSlide?.altText}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              e.currentTarget.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200" viewBox="0 0 400 200"><rect fill="%23374151" width="400" height="200"/><text fill="%239ca3af" font-size="14" x="50%" y="50%" text-anchor="middle" dy=".3em">Image not found</text></svg>';
-            }}
-          />
-        )}
+          )}
+        </div>
       </div>
 
       {/* Navigation Arrows */}

@@ -17,6 +17,7 @@ export function CarouselEditor() {
       imageUrl: '',
       altText: '',
       linkUrl: '',
+      aspectRatio: 'landscape',
     };
     updateCarousel({ slides: [...carousel.slides, newSlide] });
   };
@@ -99,29 +100,58 @@ export function CarouselEditor() {
               </div>
             </div>
 
-            <input
-              type="url"
-              placeholder="Image URL"
-              value={slide.imageUrl}
-              onChange={(e) => handleUpdateSlide(slide.id, { imageUrl: e.target.value })}
-              className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+            <div>
+              <label className="block text-sm font-medium mb-1">Image URL</label>
+              <input
+                type="url"
+                placeholder="https://example.com/image.jpg"
+                value={slide.imageUrl}
+                onChange={(e) => handleUpdateSlide(slide.id, { imageUrl: e.target.value })}
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
 
-            <input
-              type="text"
-              placeholder="Alt text"
-              value={slide.altText}
-              onChange={(e) => handleUpdateSlide(slide.id, { altText: e.target.value })}
-              className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+            <div>
+              <label className="block text-sm font-medium mb-1">Alt Text</label>
+              <input
+                type="text"
+                placeholder="Describe the image"
+                value={slide.altText}
+                onChange={(e) => handleUpdateSlide(slide.id, { altText: e.target.value })}
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
 
-            <input
-              type="url"
-              placeholder="Link URL (optional)"
-              value={slide.linkUrl || ''}
-              onChange={(e) => handleUpdateSlide(slide.id, { linkUrl: e.target.value })}
-              className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+            <div>
+              <label className="block text-sm font-medium mb-1">Link URL <span className="font-normal text-slate-400">(optional)</span></label>
+              <input
+                type="url"
+                placeholder="https://example.com/page"
+                value={slide.linkUrl || ''}
+                onChange={(e) => handleUpdateSlide(slide.id, { linkUrl: e.target.value })}
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Aspect Ratio</label>
+              <div className="flex gap-2">
+                {(['portrait', 'landscape', 'square'] as const).map((ratio) => (
+                  <button
+                    key={ratio}
+                    type="button"
+                    onClick={() => handleUpdateSlide(slide.id, { aspectRatio: ratio })}
+                    className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      slide.aspectRatio === ratio
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    {ratio.charAt(0).toUpperCase() + ratio.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         ))}
 
