@@ -259,3 +259,16 @@ app/
 data/
 └── configs/             # Stored configurations
 ```
+
+## Considerations to Add/Improve/Finesse
+
+- if "#" not included in hex code, auto add to front (improve UX, potentially prevent error-ing)
+- tested/designed/different layout for Import, Export, Reset, Save Changes button
+- tested/designed/different layout for Carousel "slide block"s
+- better handle on when user "makes changes" that are not actually different form last "Save Changes" (if this is the case, Save Changes button should be inactive)
+- refine/decide on best experience for what happens after user imports config
+- refine export file naming
+- make alt text mandatory for images, general accessibility audit
+- setup unit tests
+- allow for adding more of each "section", duplicating "sections", re-ordering "sections"
+- more carousel features (look into appropriate library)
